@@ -5,13 +5,15 @@
 
 Uncompress the archive file containing the data. 
 
-```{r}
+
+```r
 unzip("activity.zip")
 ```
 
 Read in the data and convert the date column to a Date type.
 
-```{r}
+
+```r
 activity <- read.csv("activity.csv")
 activity$date <- as.Date(activity$date)
 ```
@@ -22,16 +24,31 @@ activity$date <- as.Date(activity$date)
 Generate a histogram showing the total number of steps taken per
 day (ignoring missing values within the data).
   
-```{r}
+
+```r
 sums <- with(activity, aggregate(steps ~ date, FUN=sum))
 hist(sums$steps, main="Total Steps per Day (Histogram)", xlab="Steps")
 ```
 
+![plot of chunk unnamed-chunk-3](figure/unnamed-chunk-3.png) 
+
 Compute the mean and median of the data.
 
-```{r}
+
+```r
 mean(sums$steps)
+```
+
+```
+## [1] 10766
+```
+
+```r
 median(sums$steps)
+```
+
+```
+## [1] 10765
 ```
 
 
@@ -39,22 +56,31 @@ median(sums$steps)
 
 Remove all missing values from the data.
 
-```{r}
+
+```r
 clean = activity[complete.cases(activity),]
 ```
 
 Compute and plot the average number of steps taken for each 5 minute
 interval.
 
-```{r}
+
+```r
 means <- with(clean, aggregate(steps ~ interval, FUN=mean))
 plot(means, type="l", xlab="Interval (hhmm)", ylab="Steps")
 ```
 
+![plot of chunk unnamed-chunk-6](figure/unnamed-chunk-6.png) 
+
 Compute the interval that contains the maximum average number of steps.
 
-```{r}
+
+```r
 with(means, interval[which.max(steps)])
+```
+
+```
+## [1] 835
 ```
 
 
@@ -62,14 +88,20 @@ with(means, interval[which.max(steps)])
 
 Calculate the number of missing values within the data.
 
-```{r}
+
+```r
 sum(is.na(activity$steps))
+```
+
+```
+## [1] 2304
 ```
 
 Impute the missing values by using the average number of steps taken
 for each time interval.
 
-```{r}
+
+```r
 means <- with(activity, aggregate(steps ~ interval, FUN=mean))
 names(means) <- c("interval", "avg")
 imputed <- merge(activity, means, by="interval")
@@ -81,16 +113,31 @@ imputed$steps <- round(imputed$steps)
 Using the imputed data, generate a histogram showing the total number
 of steps taken per day.
 
-```{r}
+
+```r
 sums <- with(imputed, aggregate(steps ~ date, FUN=sum))
 hist(sums$steps, main="Total Steps per Day (Histogram)", xlab="Steps")
 ```
 
+![plot of chunk unnamed-chunk-10](figure/unnamed-chunk-10.png) 
+
 Compute the mean and median using the imputed values.
 
-```{r}
+
+```r
 mean(sums$steps)
+```
+
+```
+## [1] 10766
+```
+
+```r
 median(sums$steps)
+```
+
+```
+## [1] 10762
 ```
 
 
@@ -99,7 +146,8 @@ median(sums$steps)
 Create a factor variable that indicates whether the day is a weekday or
 weekend day.
 
-```{r}
+
+```r
 daytype <- sapply(imputed$date, weekdays)
 daytype[daytype %in% c("Saturday", "Sunday")] <- "weekend"
 daytype[daytype != "weekend"] <- "weekday"
@@ -110,11 +158,14 @@ Using the lattice graphics framework, generate a time series plot
 of the average number of steps taken averaged over weekdays and
 weekend days.
 
-```{r}
+
+```r
 library(lattice)
 means <- with(imputed, aggregate(steps ~ daytype + interval, FUN=mean))
 names(means) <- c("daytype", "interval", "steps")
 with(means, xyplot(steps ~ interval | daytype, layout=c(1,2), type="l"))
 ```
+
+![plot of chunk unnamed-chunk-13](figure/unnamed-chunk-13.png) 
 
 
